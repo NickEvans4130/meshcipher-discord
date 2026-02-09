@@ -251,6 +251,114 @@ class Commands(commands.Cog):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    @app_commands.command(name='guide', description='Post the bot guide embed')
+    async def guide(self, interaction: discord.Interaction):
+        if interaction.user.id != OWNER_ID:
+            await interaction.response.send_message(
+                'Only the server owner can use this command',
+                ephemeral=True
+            )
+            return
+
+        channel = interaction.guild.get_channel(CHANNEL_BOT_GUIDE)
+        if not channel:
+            await interaction.response.send_message(
+                'Could not find the bot-guide channel',
+                ephemeral=True
+            )
+            return
+
+        # Main welcome embed
+        welcome = discord.Embed(
+            title='MeshCipher Bot Guide',
+            description=(
+                'This bot helps manage the MeshCipher beta testing process. '
+                'Below is everything you need to know.'
+            ),
+            color=COLOR_SUCCESS
+        )
+
+        # Bug reporting
+        bugs = discord.Embed(
+            title='Reporting Bugs',
+            color=COLOR_ERROR
+        )
+        bugs.add_field(
+            name='How to Report',
+            value=(
+                'Use the `/bug` command anywhere in the server. '
+                'A form will pop up asking for your device model, Android version, '
+                'a description of the bug, and steps to reproduce it.'
+            ),
+            inline=False
+        )
+        bugs.add_field(
+            name='What Happens Next',
+            value=(
+                f'Your report gets posted in <#{CHANNEL_BUG_REPORTS}> with tracking reactions:\n'
+                f'{EMOJI_SEEN} Seen | {EMOJI_INVESTIGATING} Investigating | '
+                f'{EMOJI_FIXED} Fixed | {EMOJI_CANT_REPRODUCE} Can\'t Reproduce'
+            ),
+            inline=False
+        )
+
+        # Feature requests
+        features = discord.Embed(
+            title='Feature Requests',
+            color=COLOR_INFO
+        )
+        features.add_field(
+            name='How to Suggest',
+            value=(
+                f'Post your idea in <#{CHANNEL_FEATURE_REQUESTS}>. '
+                'The bot will automatically add voting reactions so others can weigh in.'
+            ),
+            inline=False
+        )
+        features.add_field(
+            name='Voting',
+            value=(
+                f'{EMOJI_UPVOTE} Want this | {EMOJI_DOWNVOTE} Don\'t need this | '
+                f'{EMOJI_FIRE} High priority'
+            ),
+            inline=False
+        )
+
+        # FAQ / Support
+        support = discord.Embed(
+            title='Getting Help',
+            color=COLOR_WARNING
+        )
+        support.add_field(
+            name='Auto-Answers',
+            value=(
+                f'Ask questions in <#{CHANNEL_GETTING_STARTED}> or <#{CHANNEL_TROUBLESHOOTING}> '
+                'and the bot will try to answer common questions automatically '
+                '(adding contacts, connection modes, battery usage, encryption, etc).'
+            ),
+            inline=False
+        )
+
+        # Commands reference
+        cmds = discord.Embed(
+            title='All Commands',
+            color=COLOR_INFO
+        )
+        cmds.add_field(name='/bug', value='Report a bug with a structured form', inline=False)
+        cmds.add_field(name='/stats', value='View beta testing statistics', inline=False)
+        cmds.add_field(name='/help', value='Quick list of available commands', inline=False)
+        cmds.add_field(name='/release', value='Announce a new version (developers only)', inline=False)
+        cmds.add_field(name='/gh-issue', value='Create a GitHub issue from a bug report (developers only)', inline=False)
+
+        # Send all embeds
+        await channel.send(embed=welcome)
+        await channel.send(embed=bugs)
+        await channel.send(embed=features)
+        await channel.send(embed=support)
+        await channel.send(embed=cmds)
+
+        await interaction.response.send_message('Guide posted!', ephemeral=True)
+
 
 async def setup(bot):
     await bot.add_cog(Commands(bot))
