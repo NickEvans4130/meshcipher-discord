@@ -251,7 +251,7 @@ class Commands(commands.Cog):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name='guide', description='Post the bot guide embed')
+    @app_commands.command(name='guide', description='Post guide embeds in their relevant channels')
     async def guide(self, interaction: discord.Interaction):
         if interaction.user.id != OWNER_ID:
             await interaction.response.send_message(
@@ -260,104 +260,154 @@ class Commands(commands.Cog):
             )
             return
 
-        channel = interaction.guild.get_channel(CHANNEL_BOT_GUIDE)
-        if not channel:
-            await interaction.response.send_message(
-                'Could not find the bot-guide channel',
+        await interaction.response.defer(ephemeral=True)
+        guild = interaction.guild
+        posted = []
+
+        # Bug reporting -> #bug-reports
+        ch = guild.get_channel(CHANNEL_BUG_REPORTS)
+        if ch:
+            embed = discord.Embed(
+                title='How Bug Reporting Works',
+                color=COLOR_ERROR
+            )
+            embed.add_field(
+                name='Reporting a Bug',
+                value=(
+                    'Use the `/bug` command anywhere in the server. '
+                    'A form will pop up asking for your device model, Android version, '
+                    'a description of the bug, and steps to reproduce it.'
+                ),
+                inline=False
+            )
+            embed.add_field(
+                name='Tracking',
+                value=(
+                    'Each report gets these status reactions:\n'
+                    f'{EMOJI_SEEN} Seen | {EMOJI_INVESTIGATING} Investigating | '
+                    f'{EMOJI_FIXED} Fixed | {EMOJI_CANT_REPRODUCE} Can\'t Reproduce\n\n'
+                    'Developers will react to update the status. '
+                    'You can also use `/gh-issue` (dev only) to create a GitHub issue from a report.'
+                ),
+                inline=False
+            )
+            await ch.send(embed=embed)
+            posted.append(f'<#{CHANNEL_BUG_REPORTS}>')
+
+        # Feature requests -> #feature-requests
+        ch = guild.get_channel(CHANNEL_FEATURE_REQUESTS)
+        if ch:
+            embed = discord.Embed(
+                title='How Feature Requests Work',
+                color=COLOR_INFO
+            )
+            embed.add_field(
+                name='Suggesting a Feature',
+                value=(
+                    'Post your idea as a message in this channel. '
+                    'The bot will automatically add voting reactions.'
+                ),
+                inline=False
+            )
+            embed.add_field(
+                name='Voting',
+                value=(
+                    f'{EMOJI_UPVOTE} Want this | {EMOJI_DOWNVOTE} Don\'t need this | '
+                    f'{EMOJI_FIRE} High priority\n\n'
+                    'The most popular requests help shape what gets built next.'
+                ),
+                inline=False
+            )
+            await ch.send(embed=embed)
+            posted.append(f'<#{CHANNEL_FEATURE_REQUESTS}>')
+
+        # Getting started -> #getting-started
+        ch = guild.get_channel(CHANNEL_GETTING_STARTED)
+        if ch:
+            embed = discord.Embed(
+                title='Welcome to MeshCipher Beta',
+                color=COLOR_SUCCESS
+            )
+            embed.add_field(
+                name='1. Download the APK',
+                value='Grab the latest build from https://github.com/NickEvans4130/MeshCipher/releases/latest',
+                inline=False
+            )
+            embed.add_field(
+                name='2. Set Up Your Identity',
+                value='Open the app and your hardware-bound encryption keys are generated automatically.',
+                inline=False
+            )
+            embed.add_field(
+                name='3. Add a Contact',
+                value='Scan each other\'s QR codes in person to exchange keys securely.',
+                inline=False
+            )
+            embed.add_field(
+                name='4. Start Messaging',
+                value='Choose a transport mode (Direct, Tor, WiFi Direct, Bluetooth Mesh, or P2P Tor) and send.',
+                inline=False
+            )
+            embed.add_field(
+                name='Got Questions?',
+                value='Just ask here or in the troubleshooting channel - the bot auto-answers common questions.',
+                inline=False
+            )
+            await ch.send(embed=embed)
+            posted.append(f'<#{CHANNEL_GETTING_STARTED}>')
+
+        # Troubleshooting -> #troubleshooting
+        ch = guild.get_channel(CHANNEL_TROUBLESHOOTING)
+        if ch:
+            embed = discord.Embed(
+                title='Troubleshooting & Support',
+                color=COLOR_WARNING
+            )
+            embed.add_field(
+                name='Auto-Answers',
+                value=(
+                    'Ask your question here and the bot will try to answer automatically. '
+                    'It covers common topics like adding contacts, connection modes, '
+                    'battery usage, messages not sending, crashes, encryption, and more.'
+                ),
+                inline=False
+            )
+            embed.add_field(
+                name='Still Stuck?',
+                value='If the bot can\'t help, a developer will follow up manually.',
+                inline=False
+            )
+            await ch.send(embed=embed)
+            posted.append(f'<#{CHANNEL_TROUBLESHOOTING}>')
+
+        # Announcements -> #announcements
+        ch = guild.get_channel(CHANNEL_ANNOUNCEMENTS)
+        if ch:
+            embed = discord.Embed(
+                title='Release Announcements',
+                color=COLOR_SUCCESS
+            )
+            embed.add_field(
+                name='Stay Updated',
+                value=(
+                    'New version announcements are posted here by developers using the `/release` command. '
+                    'You\'ll be pinged with a changelog and download link.'
+                ),
+                inline=False
+            )
+            await ch.send(embed=embed)
+            posted.append(f'<#{CHANNEL_ANNOUNCEMENTS}>')
+
+        if posted:
+            await interaction.followup.send(
+                f'Guide embeds posted in: {", ".join(posted)}',
                 ephemeral=True
             )
-            return
-
-        # Main welcome embed
-        welcome = discord.Embed(
-            title='MeshCipher Bot Guide',
-            description=(
-                'This bot helps manage the MeshCipher beta testing process. '
-                'Below is everything you need to know.'
-            ),
-            color=COLOR_SUCCESS
-        )
-
-        # Bug reporting
-        bugs = discord.Embed(
-            title='Reporting Bugs',
-            color=COLOR_ERROR
-        )
-        bugs.add_field(
-            name='How to Report',
-            value=(
-                'Use the `/bug` command anywhere in the server. '
-                'A form will pop up asking for your device model, Android version, '
-                'a description of the bug, and steps to reproduce it.'
-            ),
-            inline=False
-        )
-        bugs.add_field(
-            name='What Happens Next',
-            value=(
-                f'Your report gets posted in <#{CHANNEL_BUG_REPORTS}> with tracking reactions:\n'
-                f'{EMOJI_SEEN} Seen | {EMOJI_INVESTIGATING} Investigating | '
-                f'{EMOJI_FIXED} Fixed | {EMOJI_CANT_REPRODUCE} Can\'t Reproduce'
-            ),
-            inline=False
-        )
-
-        # Feature requests
-        features = discord.Embed(
-            title='Feature Requests',
-            color=COLOR_INFO
-        )
-        features.add_field(
-            name='How to Suggest',
-            value=(
-                f'Post your idea in <#{CHANNEL_FEATURE_REQUESTS}>. '
-                'The bot will automatically add voting reactions so others can weigh in.'
-            ),
-            inline=False
-        )
-        features.add_field(
-            name='Voting',
-            value=(
-                f'{EMOJI_UPVOTE} Want this | {EMOJI_DOWNVOTE} Don\'t need this | '
-                f'{EMOJI_FIRE} High priority'
-            ),
-            inline=False
-        )
-
-        # FAQ / Support
-        support = discord.Embed(
-            title='Getting Help',
-            color=COLOR_WARNING
-        )
-        support.add_field(
-            name='Auto-Answers',
-            value=(
-                f'Ask questions in <#{CHANNEL_GETTING_STARTED}> or <#{CHANNEL_TROUBLESHOOTING}> '
-                'and the bot will try to answer common questions automatically '
-                '(adding contacts, connection modes, battery usage, encryption, etc).'
-            ),
-            inline=False
-        )
-
-        # Commands reference
-        cmds = discord.Embed(
-            title='All Commands',
-            color=COLOR_INFO
-        )
-        cmds.add_field(name='/bug', value='Report a bug with a structured form', inline=False)
-        cmds.add_field(name='/stats', value='View beta testing statistics', inline=False)
-        cmds.add_field(name='/help', value='Quick list of available commands', inline=False)
-        cmds.add_field(name='/release', value='Announce a new version (developers only)', inline=False)
-        cmds.add_field(name='/gh-issue', value='Create a GitHub issue from a bug report (developers only)', inline=False)
-
-        # Send all embeds
-        await channel.send(embed=welcome)
-        await channel.send(embed=bugs)
-        await channel.send(embed=features)
-        await channel.send(embed=support)
-        await channel.send(embed=cmds)
-
-        await interaction.response.send_message('Guide posted!', ephemeral=True)
+        else:
+            await interaction.followup.send(
+                'No channels found - check your .env channel IDs',
+                ephemeral=True
+            )
 
 
 async def setup(bot):
