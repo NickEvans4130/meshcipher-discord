@@ -1,0 +1,43 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Discord
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+DISCORD_GUILD_ID = int(os.getenv('DISCORD_GUILD_ID', 0))
+
+# Channels
+CHANNEL_ANNOUNCEMENTS = int(os.getenv('CHANNEL_ANNOUNCEMENTS', 0))
+CHANNEL_BUG_REPORTS = int(os.getenv('CHANNEL_BUG_REPORTS', 0))
+CHANNEL_FEATURE_REQUESTS = int(os.getenv('CHANNEL_FEATURE_REQUESTS', 0))
+CHANNEL_GETTING_STARTED = int(os.getenv('CHANNEL_GETTING_STARTED', 0))
+CHANNEL_TROUBLESHOOTING = int(os.getenv('CHANNEL_TROUBLESHOOTING', 0))
+
+# Roles
+ROLE_BETA_TESTER = int(os.getenv('ROLE_BETA_TESTER', 0))
+ROLE_BUG_HUNTER = int(os.getenv('ROLE_BUG_HUNTER', 0))
+ROLE_DEVELOPER = int(os.getenv('ROLE_DEVELOPER', 0))
+
+# GitHub
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
+GITHUB_REPO = os.getenv('GITHUB_REPO')
+
+# Bot Settings
+BOT_PREFIX = os.getenv('BOT_PREFIX', '!')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
+
+# Emojis for reactions
+EMOJI_SEEN = '\U0001f440'
+EMOJI_INVESTIGATING = '\U0001f50d'
+EMOJI_FIXED = '\u2705'
+EMOJI_CANT_REPRODUCE = '\u274c'
+EMOJI_UPVOTE = '\U0001f44d'
+EMOJI_DOWNVOTE = '\U0001f44e'
+EMOJI_FIRE = '\U0001f525'
+
+# Colors for embeds
+COLOR_SUCCESS = 0x76D166
+COLOR_ERROR = 0xEF5350
+COLOR_INFO = 0x03A9F4
+COLOR_WARNING = 0xFFA726

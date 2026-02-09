@@ -1,0 +1,36 @@
+{
+  "keywords": {
+    "add contact": {
+      "triggers": ["add contact", "scan qr", "qr code", "add friend", "how to add"],
+      "response": "**How to Add a Contact:**\n\n1. Open MeshCipher\n2. Tap the + button\n3. Choose 'Scan QR Code'\n4. Point camera at friend's QR code\n5. Verify the safety number\n6. Done!\n\n*Need help? Ask in #troubleshooting*"
+    },
+    "connection modes": {
+      "triggers": ["connection mode", "direct mode", "tor mode", "p2p mode", "wifi direct", "bluetooth mesh", "what mode"],
+      "response": "**Connection Modes Explained:**\n\n**Direct** - Fast via relay server (HTTPS)\n**Tor Relay** - Private via Tor + relay (IP hidden)\n**P2P Tor** - Maximum privacy, no server (.onion hidden services)\n**P2P Local** - Offline (WiFi Direct + Bluetooth Mesh)\n\nAll modes use the same Signal Protocol encryption. Choose based on your threat model.\n\nMore info: https://github.com/NickEvans4130/MeshCipher/blob/develop/docs/networking.md"
+    },
+    "battery drain": {
+      "triggers": ["battery", "drain", "battery life", "uses too much battery"],
+      "response": "**Battery Drain Issues:**\n\nThis is a known area of optimization.\n\n**Tips:**\n- Use Direct mode (lowest overhead)\n- Disable Bluetooth Mesh when not needed\n- The app disconnects WebSocket when backgrounded to save battery\n\nWe're actively working on further optimizations.\n*Report your device and drain rate in #bug-reports*"
+    },
+    "messages not sending": {
+      "triggers": ["message not sending", "won't send", "stuck sending", "message failed", "not delivering"],
+      "response": "**Messages Not Sending?**\n\n**Try:**\n1. Check internet connection\n2. Switch connection mode (Settings)\n3. Force close and reopen app\n4. Check if contact is online (for P2P modes)\n\n**Note:** Messages are delivered instantly via WebSocket when both users are online. If the recipient is offline, messages queue on the relay and deliver when they reconnect.\n\nStill broken? Post in #bug-reports with:\n- Your device model\n- Connection mode\n- Error message (screenshot)"
+    },
+    "app crash": {
+      "triggers": ["crash", "crashes", "app closes", "keeps crashing", "force close"],
+      "response": "**App Crashing?**\n\nSorry about that!\n\n**Please report in #bug-reports using `/bug` with:**\n- Device model\n- Android version\n- What you were doing when it crashed\n- Steps to reproduce\n- Screenshot (if possible)\n\nThis helps us fix it quickly!"
+    },
+    "download apk": {
+      "triggers": ["download", "apk", "install", "where to download", "get app", "latest version"],
+      "response": "**Download MeshCipher:**\n\nLatest release: https://github.com/NickEvans4130/MeshCipher/releases/latest\n\n**Install:**\n1. Download the APK from the link above\n2. Enable 'Install from Unknown Sources' in device settings\n3. Open the APK file\n4. Tap Install\n\n*New versions are announced in #announcements*"
+    },
+    "disappearing messages": {
+      "triggers": ["disappearing", "disappear", "delete messages", "auto delete", "self destruct", "message timer"],
+      "response": "**Disappearing Messages:**\n\nAlready implemented!\n\n**How to use:**\n1. Open a chat conversation\n2. Tap the menu (three dots)\n3. Select 'Disappearing Messages'\n4. Choose a timer: On Close, 5 min, 1 hour, 24 hours, 7 days, or 30 days\n\nMessages are deleted after the timer expires. Both the database record and encrypted media files are removed."
+    },
+    "encryption": {
+      "triggers": ["encryption", "how secure", "end to end", "e2e", "signal protocol", "is it encrypted"],
+      "response": "**MeshCipher Encryption:**\n\n**Signal Protocol** (same as Signal app)\n- X3DH key agreement\n- Double Ratchet for perfect forward secrecy\n- Sessions persist encrypted at rest (AES-256-GCM)\n\n**Hardware-Bound Identity**\n- Ed25519 keys in Android Keystore (TEE/StrongBox)\n- Keys never leave the secure hardware\n\n**Data at Rest**\n- Database: SQLCipher (AES-256)\n- Media files: Per-file AES-256-GCM encryption\n- EXIF metadata stripped from all images\n\n**Transport Security**\n- Direct: WSS (TLS) + Signal Protocol\n- Tor: Tor circuit + Signal Protocol\n- P2P: .onion hidden service + Signal Protocol\n- Local: WiFi/BT + Signal Protocol\n\nAlways end-to-end encrypted regardless of transport mode."
+    }
+  }
+}
