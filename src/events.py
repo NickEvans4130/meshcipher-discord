@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from datetime import datetime
 import json
 import os
 import sys
@@ -12,8 +13,27 @@ class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def get_log_channel(self, guild):
+        return guild.get_channel(CHANNEL_LOGS)
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        # Log to audit channel
+        log_channel = self.get_log_channel(member.guild)
+        if log_channel:
+            embed = discord.Embed(
+                title='Member Joined',
+                color=COLOR_SUCCESS,
+                timestamp=datetime.utcnow()
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            embed.add_field(name='User', value=f'{member.mention} ({member})', inline=True)
+            embed.add_field(name='Account Created', value=discord.utils.format_dt(member.created_at, 'R'), inline=True)
+            embed.add_field(name='Member Count', value=str(member.guild.member_count), inline=True)
+            embed.set_footer(text=f'ID: {member.id}')
+            await log_channel.send(embed=embed)
+
+        # Welcome DM (existing)
         """Welcome new beta testers."""
         try:
             embed = discord.Embed(
@@ -63,6 +83,80 @@ class Events(commands.Cog):
                 await member.add_roles(role)
             except discord.Forbidden:
                 pass
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        log_channel = self.get_log_channel(member.guild)
+        if log_channel:
+            embed = discord.Embed(
+                title='Member Left',
+                color=COLOR_ERROR,
+                timestamp=datetime.utcnow()
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            embed.add_field(name='User', value=f'{member.mention} ({member})', inline=True)
+            roles = [r.mention for r in member.roles if r.name != '@everyone']
+            embed.add_field(name='Roles', value=', '.join(roles) if roles else 'None', inline=True)
+            embed.add_field(name='Member Count', value=str(member.guild.member_count), inline=True)
+            embed.set_footer(text=f'ID: {member.id}')
+            await log_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        if before.author.bot:
+            return
+        if before.content == after.content:
+            return
+
+        log_channel = self.get_log_channel(before.guild)
+        if log_channel:
+            embed = discord.Embed(
+                title='Message Edited',
+                color=COLOR_WARNING,
+                timestamp=datetime.utcnow()
+            )
+            embed.set_author(name=str(before.author), icon_url=before.author.display_avatar.url)
+            embed.add_field(name='Channel', value=before.channel.mention, inline=True)
+            embed.add_field(name='Author', value=before.author.mention, inline=True)
+            embed.add_field(
+                name='Before',
+                value=before.content[:1024] if before.content else '*empty*',
+                inline=False
+            )
+            embed.add_field(
+                name='After',
+                value=after.content[:1024] if after.content else '*empty*',
+                inline=False
+            )
+            embed.add_field(name='Jump', value=f'[Go to message]({after.jump_url})', inline=False)
+            embed.set_footer(text=f'Message ID: {before.id}')
+            await log_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.author.bot:
+            return
+
+        log_channel = self.get_log_channel(message.guild)
+        if log_channel:
+            embed = discord.Embed(
+                title='Message Deleted',
+                color=COLOR_ERROR,
+                timestamp=datetime.utcnow()
+            )
+            embed.set_author(name=str(message.author), icon_url=message.author.display_avatar.url)
+            embed.add_field(name='Channel', value=message.channel.mention, inline=True)
+            embed.add_field(name='Author', value=message.author.mention, inline=True)
+            embed.add_field(
+                name='Content',
+                value=message.content[:1024] if message.content else '*no text content*',
+                inline=False
+            )
+            if message.attachments:
+                files = '\n'.join(a.filename for a in message.attachments)
+                embed.add_field(name='Attachments', value=files, inline=False)
+            embed.set_footer(text=f'Message ID: {message.id}')
+            await log_channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):

@@ -32,7 +32,8 @@ intents.reactions = True
 bot = commands.Bot(
     command_prefix=BOT_PREFIX,
     intents=intents,
-    description='MeshCipher Beta Testing Assistant'
+    description='MeshCipher Beta Testing Assistant',
+    max_messages=10000
 )
 
 
